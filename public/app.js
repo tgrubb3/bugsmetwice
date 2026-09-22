@@ -127,7 +127,7 @@ const TRACKSENSE_LAP = {
 const PROOF = [
   { n: () => PROJECTS.length, l: 'projects live or in beta' },
   { n: () => '1',             l: 'self-proclaimed coder' },
-  { n: () => '24 hours…',     l: 'reply time, hopefully' },
+  { n: () => '24 Hours',      l: 'reply time (hopefully)' },
   { n: () => '∞',             l: 'coffees drank' }
 ];
 
