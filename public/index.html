@@ -214,8 +214,9 @@ button { font: inherit; cursor: pointer; }
 .frame img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .frame--portrait { aspect-ratio: 5 / 6; }
 /* the mark sits on the page ground so its punched rivet holes (#f7f5ef) read as holes */
-.frame--logo { background: var(--ground); }
-.frame--logo img { width: 58%; height: auto; object-fit: contain; }
+/* the mark fills a square tile rather than floating in a portrait frame */
+.frame--logo { aspect-ratio: 1 / 1; background: var(--ground-sink); }
+.frame--logo img { width: 76%; height: auto; object-fit: contain; }
 .frame--shot { aspect-ratio: 16 / 9; }
 
 /* Thrennel card: a live port of the app's constellation, on the app's own near-black */
