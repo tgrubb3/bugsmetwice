@@ -522,6 +522,8 @@ dialog.appwin .band { padding-top: clamp(24px, 3vw, 40px); }
 .waitlist__done[hidden] { display: none; }
 .waitlist__done .serif { font-size: clamp(30px, 3vw, 38px); line-height: 1.05; color: var(--accent-lift); }
 .waitlist a { color: var(--accent-lift); }
+/* links that sit inside running text on the dark panels are underlined, not colour-only */
+.readout__meta a, .band__note a, .waitlist__msg a { text-decoration: underline; text-underline-offset: 3px; }
 .waitlist a:hover { color: var(--on-dark); }
 
 .site-footer {
