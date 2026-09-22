@@ -1,8 +1,8 @@
-# Served by Cloudflare with every response. The CSP forbids inline and
-# third-party script; everything the page needs is same-origin except the
-# waitlist POST to thrennel.com.
+# Served by Cloudflare with every response. The CSP forbids inline script and
+# allows only two remote hosts: Cloudflare's own Web Analytics beacon (which it
+# injects into the HTML; cookie-free) and the waitlist POST to thrennel.com.
 /*
-  Content-Security-Policy: default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self'; connect-src https://thrennel.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Content-Security-Policy: default-src 'none'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self'; connect-src https://thrennel.com https://cloudflareinsights.com; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
   Strict-Transport-Security: max-age=31536000; includeSubDomains
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
