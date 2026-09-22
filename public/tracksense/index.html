@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TrackSense — iRacing telemetry coaching | A Personal Workshop</title>
+<meta name="description" content="iRacing telemetry in, driving coaching out. TrackSense lines your lap up against a reference by distance and tells you which corners to fix first, and exactly what to change.">
+<meta name="theme-color" content="#f7f5ef" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#16140f" media="(prefers-color-scheme: dark)">
+
+<link rel="canonical" href="https://bugsmetwice.com/tracksense/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="A Personal Workshop">
+<meta property="og:title" content="TrackSense — iRacing telemetry coaching">
+<meta property="og:description" content="iRacing telemetry in, driving coaching out. TrackSense lines your lap up against a reference by distance and tells you which corners to fix first, and exactly what to change.">
+<meta property="og:url" content="https://bugsmetwice.com/tracksense/">
+<meta property="og:image" content="https://bugsmetwice.com/og-tracksense.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="TrackSense — Which corners to fix first, and what to change.">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="/mark-folded.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/icon-180.png">
+
+<link rel="preload" href="/fonts/InstrumentSerif-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="/fonts/Karla-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header" id="siteHeader">
+  <a class="wordmark serif" href="/">A Personal Workshop</a>
+  <nav class="site-nav" aria-label="Primary">
+    <a href="/#work">Work</a>
+    <a href="/#about">About</a>
+    <a class="btn btn--sm" href="/thrennel/">Thrennel beta</a>
+  </nav>
+</header>
+
+<main id="main">
+
+  <section class="band" data-appwin-body>
+    <p class="band__crumb page-only"><a href="/#work">← All projects</a></p>
+    <div class="band__head">
+      <h1 id="tracksenseTitle">What TrackSense tells you</h1>
+      <span class="stamp" id="lapStamp"></span>
+    </div>
+    <p class="band__note"><span id="lapSummary"></span> Hover the replay to scrub it; tap a corner below for the coaching.</p>
+    <div class="ts-stage" id="tsStage"></div>
+    <div class="chart-wrap">
+      <div class="chart">
+        <div class="chart__plot" id="plot" role="group" aria-label="Time lost per corner"></div>
+        <div class="chart__labels" id="plotLabels"></div>
+      </div>
+      <aside class="readout" aria-label="Corner coaching" aria-live="polite">
+        <span class="readout__k" id="roName"></span>
+        <span class="readout__v serif" id="roDelta"></span>
+        <p class="readout__note" id="roNote"></p>
+        <div class="readout__meta">
+          <span id="roLap"></span>
+          <span id="roTotal"></span>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <nav class="more" aria-label="Other projects">
+    <span class="kicker">More from the workshop</span>
+    <div class="more__links">
+      <a href="/thrennel/">Thrennel →</a>
+      <a href="/automation/">Automation →</a>
+    </div>
+  </nav>
+
+</main>
+
+<footer class="site-footer">
+  <span>© 2026 A Personal Workshop</span>
+  <span class="serif site-footer__tag">Built in the evenings.</span>
+</footer>
+
+<script src="/app.js"></script>
+</body>
+</html>

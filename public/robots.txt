@@ -1,2 +1,4 @@
 User-agent: *
 Allow: /
+
+Sitemap: https://bugsmetwice.com/sitemap.xml

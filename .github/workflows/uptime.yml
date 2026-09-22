@@ -1,0 +1,67 @@
+# Availability watch. Every 15 minutes, probe the two things a visitor depends
+# on: this site, and Thrennel (the waitlist form posts to it). If anything is
+# down, open an issue labelled "uptime" — GitHub emails the repo owner — and
+# close it with a "recovered" note once the next probe passes.
+#
+# Note: GitHub pauses scheduled workflows in a repo with no commits for 60
+# days, and emails a warning first. A push re-enables it.
+name: Uptime
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe the site and Thrennel
+        id: probe
+        shell: bash
+        run: |
+          fail=""
+          # each probe retries a few times over ~a minute, so a blip does not page
+          get() { curl -s -o /dev/null -w '%{http_code}' --max-time 20 --retry 3 --retry-delay 20 --retry-all-errors "$1" || echo 000; }
+
+          site=$(get https://bugsmetwice.com/)
+          [ "$site" = "200" ] || fail="bugsmetwice.com returned $site"
+
+          app=$(get https://thrennel.com/request)
+          [ "$app" = "200" ] || fail="${fail:+$fail; }thrennel.com/request returned $app"
+
+          cors=$(curl -s -X OPTIONS https://thrennel.com/api/waitlist \
+                   -H 'Origin: https://bugsmetwice.com' -H 'Access-Control-Request-Method: POST' \
+                   -D - -o /dev/null --max-time 20 --retry 3 --retry-delay 20 --retry-all-errors \
+                 | grep -ci 'access-control-allow-origin: https://bugsmetwice.com' || true)
+          [ "${cors:-0}" -ge 1 ] || fail="${fail:+$fail; }waitlist CORS preflight failed (the Join form cannot send)"
+
+          echo "fail=$fail" >> "$GITHUB_OUTPUT"
+          echo "site=$site app=$app cors=$cors"
+
+      - name: Open or close the alert issue
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          FAIL: ${{ steps.probe.outputs.fail }}
+        run: |
+          open=$(gh issue list --label uptime --state open --json number --jq '.[0].number // empty')
+          now=$(date -u '+%Y-%m-%d %H:%M UTC')
+          if [ -n "$FAIL" ]; then
+            if [ -z "$open" ]; then
+              gh issue create --label uptime --title "Down: $FAIL" \
+                --body "First noticed **$now**.
+
+$FAIL
+
+This issue was opened by the uptime workflow and will be closed automatically when the next probe passes. If Thrennel is the one that is down, SSH to the VM over Tailscale and check \`sudo docker ps\` / \`sudo docker logs deploy-app-1\`."
+            fi
+          elif [ -n "$open" ]; then
+            gh issue comment "$open" --body "Recovered at **$now** — all probes passing."
+            gh issue close "$open"
+          fi

@@ -13,7 +13,7 @@ const PROJECTS = [
     tags: ['Web app', 'Knowledge graph'],
     shot: { graph: true, alt: 'Thrennel knowledge graph: thoughts orbiting topic clusters around a central core' },
     cta:  'Join the beta',
-    href: '#thrennel'
+    href: '/thrennel/'
   },
   {
     name: 'TrackSense',
@@ -23,7 +23,7 @@ const PROJECTS = [
     tags: ['iRacing', 'AI coaching'],
     shot: { lap: true, alt: 'TrackSense lap replay at Lime Rock Park: your lap chasing the reference, with time lost building corner by corner' },
     cta:  'See the coaching',
-    href: '#tracksense'
+    href: '/tracksense/'
   },
   {
     name: 'Automation',
@@ -33,7 +33,7 @@ const PROJECTS = [
     tags: ['Scheduled', 'Markdown out'],
     shot: { runlog: true, alt: 'A run log of the scheduled morning brief writing and filing itself' },
     cta:  'See how it runs',
-    href: '#automation'
+    href: '/automation/'
   }
 ];
 
@@ -194,7 +194,7 @@ const CORNERS = TRACKSENSE_LAP.corners;
 const PLOT_MAX = Math.max(...CORNERS.map((c) => c.lostS)) * 1.1;
 let picked = CORNERS.reduce((worst, c, i) => (c.lostS > CORNERS[worst].lostS ? i : worst), 0);
 
-function renderChart() {
+function renderChart(root = document) {
   $('#lapStamp').textContent = `Demo session · ${TRACKSENSE_LAP.track} · ${TRACKSENSE_LAP.car}`;
   $('#lapSummary').textContent = TRACKSENSE_LAP.summary;
 
@@ -209,7 +209,8 @@ function renderChart() {
     `<span class="${i === picked ? 'on' : ''}">${esc(c.name)}</span>`).join('');
 
   growBars();
-  $('#tracksense').addEventListener('appwin:open', growBars);
+  const win = root.closest && root.closest('dialog.appwin');
+  if (win) win.addEventListener('appwin:open', growBars);
 
   $('#plot').addEventListener('click', (e) => {
     const btn = e.target.closest('.corner');
@@ -1013,31 +1014,66 @@ function initReveal() {
 }
 
 /* ---- App windows ----
-   Any link to a window's #id opens it (so do the card buttons and the nav),
-   as does landing on the page with that hash. Esc, the close button or a
-   click on the backdrop animates it out. Opening fires `appwin:open` so a
-   window can replay its entrance (the TrackSense bars do). */
+   Every project has a real URL (/thrennel/, /tracksense/, /automation/). On
+   the home page each also has a <dialog class="appwin"> shell: a click on a
+   link to one of those URLs (or an old #id link) opens the shell as a window
+   over the page instead of navigating. The project page is fetched once, its
+   section dropped into the shell and its demos started. The address bar shows
+   the real URL while a window is open, so Back and refresh both behave, and
+   with scripts off the links simply go to the pages. */
 function initAppWindows() {
-  const wins = [...document.querySelectorAll('dialog.appwin')];
+  const wins = [...document.querySelectorAll('dialog.appwin[data-src]')];
+  if (!wins.length) return;
+  const byPath = Object.fromEntries(wins.map((d) => [d.dataset.src, d]));
   const byId = Object.fromEntries(wins.map((d) => [d.id, d]));
   const OUT_MS = 260;
+  const loads = {};
 
-  function open(d) {
-    wins.forEach((w) => { if (w !== d && w.open) shut(w, true); });
-    if (d.open) return;
-    d.showModal();
-    requestAnimationFrame(() => d.classList.add('is-open'));
-    d.dispatchEvent(new CustomEvent('appwin:open'));
-    history.replaceState(null, '', '#' + d.id);
+  function load(d) {
+    if (!loads[d.id]) {
+      loads[d.id] = fetch(d.dataset.src)
+        .then((r) => { if (!r.ok) throw new Error(String(r.status)); return r.text(); })
+        .then((html) => {
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+          const section = doc.querySelector('[data-appwin-body]');
+          if (!section) throw new Error('no project body');
+          section.querySelectorAll('.page-only').forEach((el) => el.remove());
+          const h1 = section.querySelector('h1');          // one h1 per page: demote inside the window
+          if (h1) {
+            const h2 = document.createElement('h2');
+            for (const a of h1.attributes) h2.setAttribute(a.name, a.value);
+            h2.innerHTML = h1.innerHTML;
+            h1.replaceWith(h2);
+          }
+          const body = d.querySelector('.appwin__body');
+          body.replaceChildren(document.adoptNode(section));
+          initProjectContent(body);
+        })
+        .catch((err) => { delete loads[d.id]; throw err; });
+    }
+    return loads[d.id];
   }
 
-  function shut(d, instant) {
+  function open(d, push) {
+    wins.forEach((w) => { if (w !== d && w.open) shut(w, true, false); });
+    if (d.open) return;
+    load(d).then(() => {
+      if (d.open) return;
+      d.showModal();
+      requestAnimationFrame(() => d.classList.add('is-open'));
+      d.dispatchEvent(new CustomEvent('appwin:open'));
+      if (push) history.pushState({ appwin: d.id }, '', d.dataset.src);
+    }).catch(() => { location.href = d.dataset.src; });   // the page itself always works
+  }
+
+  function shut(d, instant, unwind = true) {
     if (!d.open || d.dataset.closing) return;
     d.classList.remove('is-open');
     const done = () => {
       delete d.dataset.closing;
       d.close();
-      if (location.hash === '#' + d.id) history.replaceState(null, '', location.pathname + location.search);
+      if (unwind && history.state && history.state.appwin === d.id) history.back();
+      else if (location.hash === '#' + d.id) history.replaceState(null, '', location.pathname + location.search);
     };
     if (instant || tgReduced.matches) return done();
     d.dataset.closing = '1';
@@ -1051,15 +1087,27 @@ function initAppWindows() {
   });
 
   document.addEventListener('click', (e) => {
-    const a = e.target.closest('a[href^="#"]');
-    if (!a) return;
-    const target = byId[a.getAttribute('href').slice(1)];
-    if (target) { e.preventDefault(); open(target); return; }
-    const inside = a.closest('dialog.appwin');     // an in-page link from a window: close it first
-    if (inside) shut(inside, true);
+    const a = e.target.closest('a[href]');
+    if (!a || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const url = new URL(a.href, location.href);
+    if (url.origin !== location.origin) return;
+    const target = byPath[url.pathname] || (url.hash && byId[url.hash.slice(1)]);
+    if (target) { e.preventDefault(); open(target, true); }
   });
 
-  if (byId[location.hash.slice(1)]) open(byId[location.hash.slice(1)]);
+  // Back/Forward walk the windows the same way the clicks opened them
+  window.addEventListener('popstate', (e) => {
+    const id = e.state && e.state.appwin;
+    if (id && byId[id]) open(byId[id], false);
+    else wins.forEach((w) => { if (w.open) shut(w, false, false); });
+  });
+
+  // an old #thrennel link still opens the window
+  if (byId[location.hash.slice(1)]) open(byId[location.hash.slice(1)], false);
+
+  // fetch the three pages once the page is idle, so the first open is instant
+  const idle = window.requestIdleCallback || ((f) => setTimeout(f, 1500));
+  idle(() => wins.forEach((d) => load(d).catch(() => {})), { timeout: 2000 });
 }
 
 /* ---- Header shadow on scroll ---- */
@@ -1078,9 +1126,9 @@ function initHeader() {
 const THRENNEL_WAITLIST = 'https://thrennel.com/api/waitlist';
 const THRENNEL_REQUEST  = 'https://thrennel.com/request';
 
-function initForm() {
-  const form = $('#betaForm');
-  const msg  = $('#formMsg');
+function initForm(root = document) {
+  const form = root.querySelector('#betaForm');
+  const msg  = root.querySelector('#formMsg');
   const btn  = form.querySelector('button');
   const fallback = (lead) => {
     msg.innerHTML = `${esc(lead)} <a href="${THRENNEL_REQUEST}">Request access on thrennel.com →</a>`;
@@ -1118,18 +1166,28 @@ function initForm() {
   });
 }
 
-renderProof();
-renderProjects();
-$('#thrennelStage').innerHTML = shotMarkup({ graph: true, alt: 'Thrennel knowledge graph: thoughts orbiting topic clusters around a central core' });
-$('#tsStage').innerHTML = shotMarkup({ lap: true, alt: 'TrackSense lap replay at Lime Rock Park: your lap chasing the reference, with time lost building corner by corner' });
-document.querySelectorAll('canvas.tgraph').forEach(initConstellation);
-document.querySelectorAll('canvas.tslap').forEach(initLapReplay);
-document.querySelectorAll('.automation-wrap, .card .frame--run').forEach(initRunLog);
-renderChart();
-renderReadout();
+/* ---- Boot ----
+   Everything that carries a demo is started from `root`: the whole document
+   on load, or one window's freshly loaded body. The home page also renders
+   the stats and the cards first, so their small demos are in the document. */
+function initProjectContent(root) {
+  root.querySelectorAll('.thrennel-stage').forEach((el) => {
+    el.innerHTML = shotMarkup({ graph: true, alt: 'Thrennel knowledge graph: thoughts orbiting topic clusters around a central core' });
+  });
+  root.querySelectorAll('.ts-stage').forEach((el) => {
+    el.innerHTML = shotMarkup({ lap: true, alt: 'TrackSense lap replay at Lime Rock Park: your lap chasing the reference, with time lost building corner by corner' });
+  });
+  root.querySelectorAll('canvas.tgraph').forEach(initConstellation);
+  root.querySelectorAll('canvas.tslap').forEach(initLapReplay);
+  root.querySelectorAll('.automation-wrap, .card .frame--run').forEach(initRunLog);
+  if (root.querySelector('#plot')) { renderChart(root); renderReadout(); }
+  if (root.querySelector('#betaForm')) initForm(root);
+}
+
+if ($('#cards')) { renderProof(); renderProjects(); }
+initProjectContent(document);
 initReveal();
 initHeader();
-initForm();
 initAppWindows();
 
 /* ---- Email link ----
