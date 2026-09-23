@@ -26,10 +26,10 @@ const PROJECTS = [
     href: '/tracksense/'
   },
   {
-    name: 'Automation',
+    name: 'Pre-market portfolio brief',
     status: 'Running privately',
     dot: '#6b665b',
-    blurb: 'A pre-market portfolio brief that writes and files itself every morning, plus the skill library that keeps the rest honest.',
+    blurb: 'Writes and files itself every weekday morning: six fixed sections, every claim sourced, saved as dated markdown. A second skill audits the library that produces it.',
     tags: ['Scheduled', 'Markdown out'],
     shot: { runlog: true, alt: 'A run log of the scheduled morning brief writing and filing itself' },
     cta:  'See how it runs',

@@ -28,6 +28,46 @@
 <link rel="preload" href="/fonts/Karla-normal.woff2" as="font" type="font/woff2" crossorigin>
 
 <link rel="stylesheet" href="/style.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "WebSite",
+      "@id": "https://bugsmetwice.com/#website",
+      "url": "https://bugsmetwice.com/",
+      "name": "A Personal Workshop",
+      "description": "A workshop, not a portfolio: everything I build, at whatever stage it's honestly at. Thrennel, TrackSense, and the automation that writes my morning brief.",
+      "inLanguage": "en"
+    },
+    {
+      "@type": "ItemList",
+      "name": "The work",
+      "itemListOrder": "https://schema.org/ItemListOrderAscending",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Thrennel",
+          "url": "https://bugsmetwice.com/thrennel/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "TrackSense",
+          "url": "https://bugsmetwice.com/tracksense/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "Pre-market portfolio brief",
+          "url": "https://bugsmetwice.com/automation/"
+        }
+      ]
+    }
+  ]
+}
+</script>
 </head>
 <body>
 
@@ -91,19 +131,19 @@
           <a class="card__cta" href="/tracksense/">See TrackSense →</a>
         </article>
         <article class="card">
-          <h3>Automation</h3>
+          <h3>Pre-market portfolio brief</h3>
           <p class="card__blurb">A pre-market portfolio brief that writes and files itself every morning, plus the skill library that keeps the rest honest.</p>
-          <a class="card__cta" href="/automation/">See the automation →</a>
+          <a class="card__cta" href="/automation/">See the brief →</a>
         </article>
       </div>
       <p class="band__note noscript__note">The live demos on this page — the knowledge graph, the lap replay and the run log — need JavaScript.</p>
     </noscript>
   </section>
 
-  <dialog class="appwin" id="automation" data-src="/automation/" aria-label="Automation">
+  <dialog class="appwin" id="automation" data-src="/automation/" aria-label="Pre-market portfolio brief">
     <div class="appwin__bar">
-      <span class="appwin__title">Automation</span>
-      <button class="appwin__close" type="button" aria-label="Close Automation">×</button>
+      <span class="appwin__title">Pre-market portfolio brief</span>
+      <button class="appwin__close" type="button" aria-label="Close Pre-market portfolio brief">×</button>
     </div>
     <div class="appwin__body"></div>
   </dialog>
