@@ -125,7 +125,7 @@ const TRACKSENSE_LAP = {
 };
 
 const PROOF = [
-  { n: () => PROJECTS.length, l: 'projects live or in beta' },
+  { n: () => PROJECTS.length, l: 'projects in the workshop' },
   { n: () => '1',             l: 'self-proclaimed coder' },
   { n: () => '24 Hours',      l: 'reply time (hopefully)' },
   { n: () => '∞',             l: 'coffees drank' }
@@ -142,7 +142,7 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) =>
 function shotMarkup(shot) {
   if (shot && shot.runlog) {
     return `<div class="frame frame--shot frame--run">
-      <span class="graph-hud graph-hud--top" aria-hidden="true"><i></i>CRON · WEEKDAYS 06:45 ET</span>
+      <span class="graph-hud graph-hud--top" aria-hidden="true"><i></i>SAMPLE RUN · WEEKDAYS PRE-OPEN</span>
       <div class="rl__log" role="img" aria-label="${esc(shot.alt || '')}"></div>
       <span class="rl__chip" hidden>● FILED</span>
     </div>`;
@@ -150,7 +150,7 @@ function shotMarkup(shot) {
   if (shot && shot.lap) {
     return `<div class="frame frame--shot frame--graph frame--lap">
       <canvas class="tslap" role="img" aria-label="${esc(shot.alt || '')}"></canvas>
-      <span class="graph-hud graph-hud--top" aria-hidden="true"><i></i>REPLAY · LIME ROCK PARK</span>
+      <span class="graph-hud graph-hud--top" aria-hidden="true"><i></i>DEMO REPLAY · LIME ROCK PARK</span>
       <span class="graph-hud graph-hud--top graph-hud--right" aria-hidden="true"></span>
       <span class="graph-hud graph-hud--foot" aria-hidden="true"></span>
     </div>`;
@@ -405,7 +405,7 @@ function initConstellation(canvas) {
   const foot = frame.querySelector('.graph-hud--foot');
   const idle = window.matchMedia('(hover: hover)').matches ? 'HOVER A STAR' : 'TAP A STAR';
   const leafCount = g.nodes.filter((n) => n.kind === 'leaf').length;
-  frame.querySelector('.tgraph-count').textContent = `LIVE · ${g.nodes.length} NODES`;
+  frame.querySelector('.tgraph-count').textContent = `DEMO · ${g.nodes.length} NODES`;
 
   let t = 0, last = 0, bornAt = null, running = false, visible = false;
   let hoverId = null, pinnedId = null;
@@ -1140,6 +1140,13 @@ function initForm(root = document) {
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       msg.textContent = "That doesn't look like an email address.";
+      root.querySelector('#email').focus();
+      return;
+    }
+    const consent = root.querySelector('#consent');
+    if (consent && !consent.checked) {
+      msg.textContent = 'Please tick the box to agree, then press Join the waitlist.';
+      consent.focus();
       return;
     }
 
@@ -1149,7 +1156,8 @@ function initForm(root = document) {
       const res = await fetch(THRENNEL_WAITLIST, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, website: $('#website').value })
+        // accept_privacy: Thrennel records which privacy-notice version was agreed to
+        body: JSON.stringify({ email, website: root.querySelector('#website').value, accept_privacy: true })
       });
       if (res.ok) {
         form.hidden = true;

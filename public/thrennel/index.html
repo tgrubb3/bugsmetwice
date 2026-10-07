@@ -76,9 +76,13 @@
           <div class="waitlist__row">
             <input id="email" name="email" type="email" placeholder="you@domain.com" autocomplete="email"
                    spellcheck="false" maxlength="254" required>
-            <button class="btn btn--accent" type="submit">Join</button>
           </div>
           <input class="hp" id="website" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <label class="waitlist__consent">
+            <input id="consent" name="consent" type="checkbox" required>
+            <span>Email me a sign-up link when a spot opens. My address is used for nothing else, and I agree to the <a href="/privacy/">privacy policy</a> and <a href="https://thrennel.com/privacy">Thrennel's privacy policy</a>.</span>
+          </label>
+          <button class="btn btn--accent waitlist__submit" type="submit">Join the waitlist</button>
           <p class="waitlist__msg" id="formMsg" role="status"></p>
         </form>
         <div class="waitlist__done" id="betaDone" hidden>
@@ -105,6 +109,11 @@
 
 <footer class="site-footer">
   <span>© 2026 A Personal Workshop</span>
+  <nav class="site-footer__legal" aria-label="Legal">
+    <a href="/privacy/">Privacy</a>
+    <a href="/terms/">Terms</a>
+    <a href="/cookies/">Cookies</a>
+  </nav>
   <span class="serif site-footer__tag">Built in the evenings.</span>
 </footer>
 
